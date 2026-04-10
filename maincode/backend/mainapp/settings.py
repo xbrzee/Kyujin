@@ -130,6 +130,6 @@ STATIC_URL = 'static/'
 CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.vercel.app",
-    "https://*.onrender.com"
+    "https://kyujin-six.vercel.app/",
+    "https://kyujin.onrender.com"
 ]
