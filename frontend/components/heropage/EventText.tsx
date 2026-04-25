@@ -11,19 +11,30 @@ interface Anime {
 
 export default function EventText() {
   const [animes, setAnimes] = useState<Anime[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/anime/", { cache: 'no-store' })
-      .then((res) => res.json())
-      .then((data) => setAnimes(data))
-      .catch((err) => console.error("Error fetching anime:", err));
+   
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    
+    fetch(`${baseUrl}/api/anime/`, { cache: 'no-store' })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        setAnimes(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching anime:", err);
+        setError(err.message);
+      });
   }, []);
 
   const renderCards = () => (
     animes.map((anime, index) => (
       <div 
         key={`${anime.id}-${index}`} 
-     
         className="min-w-[22rem] h-[32rem] rounded-3xl border border-white/5 bg-[var(--background)] overflow-hidden flex flex-col relative group shadow-2xl mx-4 shrink-0"
       >
         <div className="absolute inset-0 w-full h-full">
@@ -34,7 +45,6 @@ export default function EventText() {
           />
         </div>
         
-    
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/80 to-transparent">
           <h2 className="text-white text-2xl font-bold line-clamp-2 leading-tight tracking-tight">
             {anime.title}
@@ -53,17 +63,25 @@ export default function EventText() {
         <p>Trending Now</p>
       </div>
 
-      <div className="relative flex w-full">
-        <div className="flex animate-infinite-scroll cursor-pointer">
-          {renderCards()}
-          {renderCards()}
+    
+      {animes.length > 0 ? (
+        <div className="relative flex w-full">
+          <div className="flex animate-infinite-scroll cursor-pointer">
+            {renderCards()}
+            {renderCards()}
+          </div>
         </div>
-      </div>
-
-      {animes.length === 0 && (
+      ) : (
+       
         <div className="flex flex-col items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
-          <p className="text-zinc-500 font-medium">Fetching from Neon Database...</p>
+          {!error ? (
+            <>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+              <p className="text-zinc-500 font-medium">Fetching from Neon Database...</p>
+            </>
+          ) : (
+            <p className="text-red-500 font-medium">Error: {error}</p>
+          )}
         </div>
       )}
     </main>
