@@ -7,3 +7,4 @@ class Anime(models.Model):
     score = models.FloatField(default=0.0)
     def __str__(self):
         return self.title
+    
